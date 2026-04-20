@@ -8,49 +8,44 @@
 #include <numeric>
 using namespace std;
 
-//  Ant Colony Optimization — How It Works
-
-//  Parameters used here and what they control:
-//    numAnts       — how many ants explore per iteration
-//    numIteratrations — how long to run before stopping
-//    phInfluence          — pheromone influence; higher → more exploitation
-//    distInfluence           — heuristic influence; higher → greedier choices
-//    RHO            — evaporation rate (0 < ρ < 1)
-//    Q              — pheromone deposit constant (scales deposit amount)
-//    TAU_INIT       — starting pheromone on all edges
+//Ant Colony Optimization
+//references used: 
+//https://www.geeksforgeeks.org/machine-learning/introduction-to-ant-colony-optimization/
+//https://www.youtube.com/watch?v=1qpvpOHGRqA
+//https://www.youtube.com/watch?v=783ZtAF4j5g
+//https://www.youtube.com/watch?v=u7bQomllcJw&t=16s
+//https://www.youtube.com/watch?v=qfeymoF8pb4&t=1s
 
 struct AcoParams {
-    int    numAnts       = 30;
-    int    numIterations = 200;
-    double phInfluence   = 1.0;   // pheromone exponent
-    double distInfluence = 3.0;   // heuristic exponent
-    double rho           = 0.1;   // evaporation rate
-    double Q             = 100.0; // deposit constant
-    double initialPh     = 1.0;   // initial pheromone on every edge
+    int numAnts = 30;
+    int numIterations = 200;
+    double phInfluence   = 1.0;//pheromone exponent
+    double distInfluence = 3.0;//distance exponent
+    double rho = 0.1;//evaporation rate
+    double Q = 100.0; //deposit constant
+    double initialPh = 1.0;//initial pheromone on every edge
 };
 
 struct AcoResult {
-    vector<int> path;        // sequence of node indices from start to goal
-    double           totalCost;   // sum of Manhattan distances along the path
-    int              iterations;  // how many iterations were run
+    vector<int> path; //sequence of node indices from start to goal
+    double totalCost;   //sum of Manhattan distances along the path
+    int iterations;  //how many iterations were run
 };
 
 class AntColonyOptimization {
 public:
-    AntColonyOptimization(const vector<Node>& graph,
-                          int startNode,
-                          int goalNode,
-                          const AcoParams& params = AcoParams{})
-        : graph_(graph),
-          start_(startNode),
-          goal_(goalNode),
-          params_(params),
-          rng_(random_device{}())
+    AntColonyOptimization(const vector<Node>& graph, int startNode,int goalNode,
+    const AcoParams& params = AcoParams{}): 
+        graph_(graph),
+        start_(startNode),
+        goal_(goalNode),
+        params_(params),
+        rng_(random_device{}())
     {
         initPheromones();
     }
 
-    // Run the ACO and return the best path found.
+    //runs the ACO and return the best path found.
     AcoResult run() {
         AcoResult best;
         best.totalCost = numeric_limits<double>::infinity();
@@ -60,7 +55,7 @@ public:
 
             // Each ant constructs a tour
             vector<vector<int>> allPaths;
-            vector<double>           allCosts;
+            vector<double> allCosts;
 
             for (int ant = 0; ant < params_.numAnts; ++ant) {
                 vector<int> path;
@@ -75,14 +70,12 @@ public:
                     }
                 }
             }
-
             // Update pheromones
             evaporate();
             depositPheromones(allPaths, allCosts);
 
             if ((iter + 1) % 50 == 0) {
-                cout << "  Iteration " << (iter + 1)
-                          << " | Best so far: " << best.totalCost << "\n";
+                cout << "  Iteration " << (iter + 1) << " | Best so far: " << best.totalCost << "\n";
             }
         }
 
@@ -91,12 +84,10 @@ public:
 
 private:
     const vector<Node>& graph_;
-    int                      start_;
-    int                      goal_;
-    AcoParams                params_;
-    mt19937             rng_;
-
-    // pheromone_[u][i] = pheromone on edge from u to u's i-th neighbor
+    int start_;
+    int goal_;
+    AcoParams params_;
+    mt19937 rng_;
     vector<vector<double>> pheromone_;
 
     void initPheromones() {
@@ -137,7 +128,7 @@ private:
         const auto& neighbors = graph_[current].neighbors;
         if (neighbors.empty()) return -1;
 
-        // Compute unnormalized weights for each allowed neighbor
+        //compute unnormalized weights for each allowed neighbor
         vector<double> weights;
         vector<int>    candidates;
 
@@ -149,7 +140,7 @@ private:
             if (dist <= 0.0) dist = 1e-9; // avoid divide-by-zero
 
             double tau = pheromone_[current][i];
-            double eta = 1.0 / dist;   // heuristic: shorter edge is better
+            double eta = 1.0 / dist;   //shorter edge is better
 
             double weight = pow(tau, params_.phInfluence) *
                             pow(eta, params_.distInfluence);
@@ -160,7 +151,7 @@ private:
 
         if (candidates.empty()) return -1;
 
-        // Roulette-wheel selection
+        //roulette-wheel selection
         discrete_distribution<int> dist(weights.begin(), weights.end());
         return candidates[dist(rng_)];
     }
@@ -169,13 +160,12 @@ private:
         for (auto& row : pheromone_) {
             for (double& tau : row) {
                 tau *= (1.0 - params_.rho);
-                if (tau < 1e-9) tau = 1e-9; // floor to prevent extinction
+                if (tau < 1e-9) tau = 1e-9; //floor to prevent extinction
             }
         }
     }
 
-    void depositPheromones(const vector<vector<int>>& paths,
-                           const vector<double>&           costs)
+    void depositPheromones(const vector<vector<int>>& paths, const vector<double>& costs)
     {
         for (size_t a = 0; a < paths.size(); ++a) {
             double deposit = params_.Q / costs[a];
