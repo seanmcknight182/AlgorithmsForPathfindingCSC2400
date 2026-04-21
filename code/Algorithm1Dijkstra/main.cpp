@@ -102,7 +102,7 @@ int main() {
 	//
 	// and it doesnt work the first time I try to compile it, chud gpt deserves its name.
 	
-	ofstream outputfile("BenchmarkResults.txt");
+	ofstream outputfile("results.txt");
 
 	int target = 299;	//it was using a variable which didnt exist?
     if (dist[target] == numeric_limits<int>::max()) {
