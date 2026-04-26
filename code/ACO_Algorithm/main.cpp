@@ -8,7 +8,6 @@
 #include <limits>
 #include <random>
 #include <algorithm>
-#include <numeric>
 
 using namespace std;
 
@@ -40,7 +39,7 @@ vector<Node> loadGraph(const string& filePath) {
         int n1, n2, n3, n4;
 
         if (!(iss >> node.x >> node.y >> n1 >> n2 >> n3 >> n4)) {
-            throw runtime_error("Malformed line in graph file: " + line);
+            throw runtime_error("Malformed line: " + line);
         }
 
         for (int n : {n1, n2, n3, n4}) {
@@ -68,21 +67,19 @@ struct AcoParams {
 struct AcoResult {
     vector<int> path;
     int totalCost = 0;
-    int iterations = 0;
 };
 
 class AntColonyOptimization {
 public:
-    AntColonyOptimization(const vector<Node>& graph, int startNode, int goalNode, const AcoParams& params = AcoParams{})
+    AntColonyOptimization(const vector<Node>& graph, int startNode, int goalNode, const AcoParams& params)
         : graph_(graph), start_(startNode), goal_(goalNode), params_(params), rng_(random_device{}())
     {
         initPheromones();
     }
 
-    AcoResult run() {
+    AcoResult run(long long& ops) {
         AcoResult best;
         best.totalCost = numeric_limits<int>::max();
-        best.iterations = params_.numIterations;
 
         for (int iter = 0; iter < params_.numIterations; ++iter) {
 
@@ -93,7 +90,9 @@ public:
                 vector<int> path;
                 double cost = 0.0;
 
-                if (constructTour(path, cost)) {
+                ops++;
+
+                if (constructTour(path, cost, ops)) {
                     int icost = (int)cost;
                     allPaths.push_back(path);
                     allCosts.push_back(icost);
@@ -106,7 +105,7 @@ public:
             }
 
             evaporate();
-            depositPheromones(allPaths, allCosts);
+            depositPheromones(allPaths, allCosts, ops);
         }
 
         return best;
@@ -114,8 +113,7 @@ public:
 
 private:
     const vector<Node>& graph_;
-    int start_;
-    int goal_;
+    int start_, goal_;
     AcoParams params_;
     mt19937 rng_;
     vector<vector<double>> pheromone_;
@@ -127,7 +125,7 @@ private:
         }
     }
 
-    bool constructTour(vector<int>& path, double& cost) {
+    bool constructTour(vector<int>& path, double& cost, long long& ops) {
         vector<bool> visited(graph_.size(), false);
 
         int current = start_;
@@ -140,9 +138,11 @@ private:
         int maxSteps = graph_.size() * 2;
 
         for (int step = 0; step < maxSteps; ++step) {
+            ops++;
+
             if (current == goal_) return true;
 
-            int next = chooseNext(current, visited);
+            int next = chooseNext(current, visited, ops);
             if (next == -1) return false;
 
             cost += manhattanDist(graph_[current], graph_[next]);
@@ -155,7 +155,7 @@ private:
         return current == goal_;
     }
 
-    int chooseNext(int current, const vector<bool>& visited) {
+    int chooseNext(int current, const vector<bool>& visited, long long& ops) {
         const auto& neighbors = graph_[current].neighbors;
         if (neighbors.empty()) return -1;
 
@@ -165,6 +165,8 @@ private:
         for (size_t i = 0; i < neighbors.size(); ++i) {
             int v = neighbors[i];
             if (visited[v]) continue;
+
+            ops++;
 
             double dist = manhattanDist(graph_[current], graph_[v]);
             if (dist <= 0) dist = 1e-9;
@@ -195,16 +197,22 @@ private:
     }
 
     void depositPheromones(const vector<vector<int>>& paths,
-                           const vector<int>& costs) {
+                           const vector<int>& costs,
+                           long long& ops) {
         for (size_t a = 0; a < paths.size(); ++a) {
+            if (costs[a] <= 0) continue;
+
             double deposit = params_.Q / costs[a];
             const auto& path = paths[a];
 
             for (size_t i = 0; i + 1 < path.size(); ++i) {
+                ops++;
+
                 int u = path[i];
                 int v = path[i + 1];
 
                 const auto& nbrs = graph_[u].neighbors;
+
                 for (size_t j = 0; j < nbrs.size(); ++j) {
                     if (nbrs[j] == v) {
                         pheromone_[u][j] += deposit;
@@ -231,24 +239,36 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    int n = graph.size();
+
     AcoParams params;
-    AntColonyOptimization aco(graph, 0, 299, params);
+    AntColonyOptimization aco(graph, 0, n - 1, params);
 
-    AcoResult result = aco.run();
+    long long ops = 0;
 
-    ofstream outFile("results.txt");
+    auto t1 = chrono::high_resolution_clock::now();
+    AcoResult result = aco.run(ops);
+    auto t2 = chrono::high_resolution_clock::now();
+
+    long long duration =
+        chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
+
+    // REQUIRED filename format: 2_(num_points).txt
+    string filename = "2_" + to_string(n) + ".txt";
+    ofstream outFile(filename);
+
     if (!outFile.is_open()) {
-        cerr << "Error: could not open results.txt\n";
+        cerr << "Error: could not open output file\n";
         return 1;
     }
 
-    outFile << "Path:\n";
-    for (int idx : result.path) {
-        outFile << idx << " ";
-    }
-
-    outFile << "\nTotal cost: " << result.totalCost << "\n";
+    // STRICT FORMAT OUTPUT
+    outFile << "time_ms,basic_op_count,weight\n";
+    outFile << duration << "," << ops << "," << result.totalCost << "\n";
 
     outFile.close();
+
+    cout << "Done. Results written to " << filename << "\n";
+
     return 0;
 }
