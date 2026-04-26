@@ -5,7 +5,8 @@ ALGO_DIRS = ACO_Algorithm A_Star_Algorithm Algorithm1Dijkstra Bellman_Ford_Algor
 DATA_GEN = dataGen
 ALGO_EXE = runAlgo
 
-SIZES = 200 400 800 1600 3200 6400
+# ✅ Updated sizes
+SIZES = 150 300 600 1200 2400 4800 9600 19200
 
 all: run
 
@@ -23,7 +24,7 @@ algos:
 # Full pipeline
 run: compile loop python clean
 
-# 🔁 Main loop: generate → copy → run (for each size)
+# 🔁 Main loop: generate → copy → run
 loop:
 	for n in $(SIZES); do \
 		echo "===== Running with $$n points ====="; \
