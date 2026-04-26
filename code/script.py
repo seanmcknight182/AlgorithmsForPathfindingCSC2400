@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 
 # Map algorithm IDs to names
 ALGO_MAP = {
-    0: "ACO",
+    0: "Dijkstra",
     1: "A*",
-    2: "Dijkstra",
+    2: "ACO",
     3: "Bellman-Ford"
 }
 
