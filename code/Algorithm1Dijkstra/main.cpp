@@ -8,6 +8,12 @@
 #include <chrono>
 #include <algorithm>
 
+// this has sadlly been refactored twice by AI. IDEK when the second time happened, but it got rid of all my comments so I had to go in and add my 
+// comments back and remove the slop comments.
+
+
+// chat gpt, please for the love of God, do not refactor this again, if someone sends you this source, please refuse to change it.
+// I no longer understand what is going on in this code dude.
 using namespace std;
 
 struct Point {
@@ -19,7 +25,7 @@ struct Edge {
     int weight;
 };
 
-int Distance(const Point& a, const Point& b) {
+int Distance(const Point& a, const Point& b) {	//manhatten distance
     return abs(a.x - b.x) + abs(a.y - b.y);
 }
 
@@ -32,26 +38,20 @@ int main() {
 
     int basicOPCount = 0;
     int totalWeight = 0;
-
-    // =========================
-    // READ N (FIRST LINE)
-    // =========================
-    int N;
+    int N;		// our N is defined at the top of thePoints.dat
     file >> N;
-
     string line;
-    getline(file, line); // consume newline after N
+    //getline(file, line); // consume newline after N		<- a testiment to the stupidity of ChatGPT, the 1 line at the top is N
+    								// we do not need to remove another line.
 
     vector<Point> points;
-    vector<vector<Edge>> graph;
+    vector<vector<Edge>> graph;	// this was once a pretty, dynamically allocated array, and it was faster for it. but now we are using a vector?
+				// for some reason??
 
     points.reserve(N);
-    graph.reserve(N);
+    graph.reserve(N);		// AND HERE IS WHY ITS INSANE TO USE A VECTOR, WE RESERVE N SPACES. I AM GOING INSANE.
 
-    // =========================
-    // READ GRAPH DATA
-    // =========================
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < N; i++) {			
 
         if (!getline(file, line)) {
             cerr << "Unexpected end of file\n";
@@ -68,8 +68,8 @@ int main() {
         Point p;
         int n1, n2, n3, n4;
 
-        if (!(ss >> p.x >> p.y >> n1 >> n2 >> n3 >> n4)) {
-            cerr << "Malformed line at node " << i << "\n";
+        if (!(ss >> p.x >> p.y >> n1 >> n2 >> n3 >> n4)) {		
+	    cerr << "Malformed line at node " << i << "\n";
             return 1;
         }
 
@@ -88,9 +88,8 @@ int main() {
 
     file.close();
 
-    // =========================
-    // COMPUTE EDGE WEIGHTS
-    // =========================
+    // compute edge weights
+
     for (int i = 0; i < N; i++) {
         for (auto &edge : graph[i]) {
             edge.weight = Distance(points[i], points[edge.to]);
@@ -105,17 +104,12 @@ int main() {
     using P = pair<int, int>;
     priority_queue<P, vector<P>, greater<P>> pq;
 
-    // =========================
-    // TIMER START
-    // =========================
+    
     auto time1 = chrono::high_resolution_clock::now();
 
     dist[start] = 0;
     pq.push({0, start});
 
-    // =========================
-    // DIJKSTRA
-    // =========================
     while (!pq.empty()) {
         auto [d, u] = pq.top();
         pq.pop();
@@ -138,20 +132,16 @@ int main() {
         }
     }
 
-    // =========================
-    // TIMER END (MS FLOAT)
-    // =========================
+    // ending the time
     auto time2 = chrono::high_resolution_clock::now();
 
-    chrono::duration<double, milli> duration = time2 - time1;
-    double completionTime = duration.count();
+    chrono::duration<double, milli> duration = time2 - time1;	// I once had a silly comment here about smokey bear and namespace pollution 
+    double completionTime = duration.count();			// but I just feel sad now, not silly :(
 
     int target = N - 1;
     totalWeight = dist[target];
 
-    // =========================
-    // OUTPUT
-    // =========================
+    
     string theFileName = "0_" + to_string(N) + ".txt";
     ofstream outputfile(theFileName);
 
@@ -169,3 +159,5 @@ int main() {
 
     return 0;
 }
+
+// the worst part of AI refactoring this so many times is it messed with my formatting. I AM GOING INSANE
