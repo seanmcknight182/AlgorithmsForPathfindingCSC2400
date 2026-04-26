@@ -29,7 +29,7 @@ struct pointStruc{
 	// our variables, not very many	
 	int nodes;			// varriable number of nodes.
 	pointStruc* theArray; 		// 3 points for every x, and for (most) y, added the extra space up top to prevent issue ng taken by points with same
-	int* writable;			// writable[i][0] is the original y value
+	int (*writable)[5];			// writable[i][0] is the original y value
 					// writable[i][1] is how many points have that y value
 					// writable[i][2-4] is the index in theArray[] that have this y value
 					// wouldve been better to make this a structure, but idk what I would name it
@@ -66,8 +66,9 @@ int middleOfThree(int a, int b, int c) {	//thanks chat, this function would be a
 
 public: 
 	thePoints(int numOfNodes){
+		nodes = (numOfNodes/3)+5;	// the line b
+		writable = new int[nodes][5];
 		nodes = numOfNodes;
-		writable = new int[(nodes/3 + 5)][5];	
 		theArray = new pointStruc[nodes];	
 		for(int i = 0; i < ((nodes/3)+5); i++){		//this is for the y values
 			writable[i][0] = i;	// as previously defined this is the y value
@@ -84,8 +85,8 @@ public:
 		theArray[nodes-1].yValue = ((nodes/3) -1);
 		writable[0][1] = 1;
 		writable[0][2] = 0;
-		writable[99][1] = 1;
-		writable[99][2] = 299;
+		writable[(nodes/3)-1][1] = 1;
+		writable[(nodes/3)-1][2] = nodes-1;
 		//cout << "init done \n";
 		
 		
@@ -93,10 +94,10 @@ public:
 	void generatePoints(){
 		srand(time(0));
 		cout << "started to gen points";
-		int acceptableWritePos = 104;	// for use with writable
+		int acceptableWritePos = (nodes/3)+4;	// for use with writable
 		int writableIndex = writableIndex = rand() % nodes;
 		int placeholder = 0; // for use in the ugly part's swapping
-		for(int i = 1; i < 299; i++){	// theArray[0] and [299] are preset to always be 0,0 and 99,99 respectively
+		for(int i = 1; i < nodes -1; i++){	// theArray[0] and [299] are preset to always be 0,0 and 99,99 respectively
 			theArray[i].xValue=i/3;
 			//cout << i <<"wrote value \n";
 			do{
@@ -134,7 +135,7 @@ public:
 		}		// ugly part over
 		int i1, i2, i3, a, b, c;
 		// add the edges
-		for(int i = 0; i < 100; i++){
+		for(int i = 0; i < nodes/3; i++){
 			int a, b, c;
 			i1 = i*3;
 			i2 = i1+1;
@@ -163,7 +164,7 @@ public:
 					break;
 			}
 		}
-		for(int i = 0; i < 105; i++){
+		for(int i = 0; i < ((nodes/3) +5); i++){
 			int a, b, c;
 			i1 = writable[i][2];
 			i2 = writable[i][3];
@@ -207,9 +208,9 @@ public:
 	}
 };
 
-int main(int, numberOfNodes) {
+int main(int argc, char* argv[]) {	// argv[1] == number of nodes to generate
 	srand(time(0));
-
+	int numberOfNodes=atoi(argv[1]);
 	thePoints varName(numberOfNodes); // couldnt think of anything better to name it :(	
 	varName.generatePoints();
 	varName.outputPoints();
