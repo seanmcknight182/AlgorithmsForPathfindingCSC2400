@@ -3,11 +3,11 @@ import re
 import matplotlib.pyplot as plt
  
 # Subdirectory name -> algorithm display name
-ALGO_DIRS = {
-    "Algorithm1Dijkstra":     "Dijkstra",
-    "A_Star_Algorithm":       "A*",
-    "ACO_Algorithm":          "ACO",
-    "Bellman_Ford_Algorithm": "Bellman-Ford",
+RESULT_DIRS = {
+    "../results/1Dijkstra_Results":    "Dijkstra",
+    "../results/A_Star_Results":       "A*",
+    "../results/ACO_Results":          "ACO",
+    "../results/Bellman_Ford_Results": "Bellman-Ford",
 }
  
 # Files named like 0_300.txt inside each subdirectory
@@ -40,22 +40,22 @@ def parse_txt(filepath):
 # Data collection
  
 def collect_data():
-    """Scan each algorithm subdirectory for TXT result files."""
+    """Scan each results directory for TXT result files."""
     data = {}
  
-    for algo_dir, algo_name in ALGO_DIRS.items():
-        if not os.path.isdir(algo_dir):
-            print(f"Warning: directory '{algo_dir}' not found, skipping.")
+    for result_dir, algo_name in RESULT_DIRS.items():
+        if not os.path.isdir(result_dir):
+            print(f"Warning: directory '{result_dir}' not found, skipping.")
             continue
  
         algo_data = []
-        for filename in os.listdir(algo_dir):
+        for filename in os.listdir(result_dir):
             match = re.match(TXT_FILE_PATTERN, filename)
             if not match:
                 continue
  
             num_points = int(match.group(2))
-            filepath   = os.path.join(algo_dir, filename)
+            filepath   = os.path.join(result_dir, filename)
  
             try:
                 metrics = parse_txt(filepath)
@@ -99,9 +99,11 @@ def main():
         print("No data found. Make sure the algorithm subdirectories contain result .txt files.")
         return
  
-    plot_metric(data, "time",   "Time (ms)",            "time_plot.png")
-    plot_metric(data, "ops",    "Basic Operation Count", "ops_plot.png")
-    plot_metric(data, "weight", "Weight",                "weight_plot.png")
+    os.makedirs("../graphs", exist_ok=True)
+ 
+    plot_metric(data, "time",   "Time (ms)",            "../graphs/time_plot.png")
+    plot_metric(data, "ops",    "Basic Operation Count", "../graphs/ops_plot.png")
+    plot_metric(data, "weight", "Weight",                "../graphs/weight_plot.png")
  
  
 if __name__ == "__main__":

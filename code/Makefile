@@ -11,6 +11,11 @@ ASTAR = A_Star_Algorithm
 DIJKSTRA = Algorithm1Dijkstra
 BELLMAN = Bellman_Ford_Algorithm
 
+ACO_RES      = ../results/ACO_Results
+ASTAR_RES    = ../results/A_Star_Results
+DIJKSTRA_RES = ../results/1Dijkstra_Results
+BELLMAN_RES  = ../results/Bellman_Ford_Results
+
 all: run
 
 # ========================
@@ -53,10 +58,10 @@ define RUN_SIZE
 	cp thePoints.dat $(DIJKSTRA)/thePoints.dat
 	cp thePoints.dat $(BELLMAN)/thePoints.dat
 
-	cd $(ACO) && ./$(ALGO_EXE)
-	cd $(ASTAR) && ./$(ALGO_EXE)
-	cd $(DIJKSTRA) && ./$(ALGO_EXE)
-	cd $(BELLMAN) && ./$(ALGO_EXE)
+	cd $(ACO)      && ./$(ALGO_EXE) && mv *.txt ../../results/ACO_Results/
+	cd $(ASTAR)    && ./$(ALGO_EXE) && mv *.txt ../../results/A_Star_Results/
+	cd $(DIJKSTRA) && ./$(ALGO_EXE) && mv *.txt ../../results/1Dijkstra_Results/
+	cd $(BELLMAN)  && ./$(ALGO_EXE) && mv *.txt ../../results/Bellman_Ford_Results/
 endef
 
 # ========================
