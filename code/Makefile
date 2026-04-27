@@ -41,28 +41,22 @@ loop:
 	$(MAKE) run9600
 	$(MAKE) run19200
 	$(MAKE) run38400
+
 # ========================
 # HELPER MACRO (REPEATED PATTERN)
 # ========================
 define RUN_SIZE
-	$(DATA_GEN) $(1)
+	./$(DATA_GEN) $(1)
 
-	@copy thePoints.dat $(ACO)\thePoints.dat >nul
-	@copy thePoints.dat $(ASTAR)\thePoints.dat >nul
-	@copy thePoints.dat $(DIJKSTRA)\thePoints.dat >nul
-	@copy thePoints.dat $(BELLMAN)\thePoints.dat >nul
+	cp thePoints.dat $(ACO)/thePoints.dat
+	cp thePoints.dat $(ASTAR)/thePoints.dat
+	cp thePoints.dat $(DIJKSTRA)/thePoints.dat
+	cp thePoints.dat $(BELLMAN)/thePoints.dat
 
-	@$(ACO)\$(ALGO_EXE) $(ACO)\thePoints.dat
-	@move /Y $(ACO)\*.txt $(ACO)\ >nul
-
-	@$(ASTAR)\$(ALGO_EXE) $(ASTAR)\thePoints.dat
-	@move /Y $(ASTAR)\*.txt $(ASTAR)\ >nul
-
-	@$(DIJKSTRA)\$(ALGO_EXE) $(DIJKSTRA)\thePoints.dat
-	@move /Y $(DIJKSTRA)\*.txt $(DIJKSTRA)\ >nul
-
-	@$(BELLMAN)\$(ALGO_EXE) $(BELLMAN)\thePoints.dat
-	@move /Y $(BELLMAN)\*.txt $(BELLMAN)\ >nul
+	cd $(ACO) && ./$(ALGO_EXE)
+	cd $(ASTAR) && ./$(ALGO_EXE)
+	cd $(DIJKSTRA) && ./$(ALGO_EXE)
+	cd $(BELLMAN) && ./$(ALGO_EXE)
 endef
 
 # ========================
@@ -103,8 +97,9 @@ run38400:
 # CLEAN
 # ========================
 clean:
-	@del $(DATA_GEN).exe 2>nul
-	@del $(ACO)\$(ALGO_EXE).exe 2>nul
-	@del $(ASTAR)\$(ALGO_EXE).exe 2>nul
-	@del $(DIJKSTRA)\$(ALGO_EXE).exe 2>nul
-	@del $(BELLMAN)\$(ALGO_EXE).exe 2>nul
+	rm -f $(DATA_GEN).exe
+	rm -f $(ACO)/$(ALGO_EXE).exe
+	rm -f $(ASTAR)/$(ALGO_EXE).exe
+	rm -f $(DIJKSTRA)/$(ALGO_EXE).exe
+	rm -f $(BELLMAN)/$(ALGO_EXE).exe
+	rm -f thePoints.dat

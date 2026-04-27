@@ -7,7 +7,7 @@
 
 using namespace std;
 
-// ===================== DATA STRUCTS =====================
+// DATA STRUCTS
 
 struct Point {
     int x, y;
@@ -18,13 +18,13 @@ struct Edge {
     int src, dst, weight;
 };
 
-// ===================== UTIL =====================
+// UTIL
 
 int manhattanDist(const Point& a, const Point& b) {
     return abs(a.x - b.x) + abs(a.y - b.y);
 }
 
-// ===================== GRAPH LOADING =====================
+// GRAPH LOADING
 
 bool loadGraph(const string& filename, vector<Point>& points, vector<Edge>& edges) {
     ifstream file(filename);
@@ -38,7 +38,7 @@ bool loadGraph(const string& filename, vector<Point>& points, vector<Edge>& edge
 
     string line;
 
-    // ✅ skip first line (node count)
+    //skip first line (node count)
     getline(file, line);
 
     while (true) {
@@ -66,7 +66,7 @@ bool loadGraph(const string& filename, vector<Point>& points, vector<Edge>& edge
     return true;
 }
 
-// ===================== BELLMAN-FORD =====================
+// BELLMAN-FORD
 
 int bellmanFord(const vector<Edge>& edges,
                 int V,
@@ -104,7 +104,7 @@ int bellmanFord(const vector<Edge>& edges,
     return 0;
 }
 
-// ===================== MAIN =====================
+// MAIN
 
 int main() {
     vector<Point> points;
@@ -121,21 +121,21 @@ int main() {
     vector<int> dist, pred;
     long long ops = 0;
 
-    // ===================== TIMER =====================
+    // TIMER
     auto t1 = chrono::high_resolution_clock::now();
 
     bellmanFord(edges, n, SRC, dist, pred, ops);
 
     auto t2 = chrono::high_resolution_clock::now();
 
-    // ✅ FLOATING POINT MILLISECONDS
+    //FLOATING POINT MILLISECONDS
     double duration_ms =
         chrono::duration<double, milli>(t2 - t1).count();
 
-    // ===================== SAFETY CHECK =====================
+    // SAFETY CHECK
     int weight = (dist[DST] == INT_MAX) ? -1 : dist[DST];
 
-    // ===================== OUTPUT =====================
+    // OUTPUT
     string filename = "3_" + to_string(n) + ".txt";
     ofstream out(filename);
 

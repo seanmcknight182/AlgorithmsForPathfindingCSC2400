@@ -12,7 +12,7 @@
 
 using namespace std;
 
-// ===================== GRAPH =====================
+// GRAPH
 
 struct Node {
     int x, y;
@@ -56,7 +56,7 @@ vector<Node> loadGraph(const string& filePath) {
     return graph;
 }
 
-// ===================== ACO =====================
+// ACO
 
 struct AcoParams {
     int numAnts = 30;
@@ -228,7 +228,7 @@ private:
     }
 };
 
-// ===================== MAIN =====================
+// MAIN
 
 int main(int argc, char* argv[]) {
     string dataFile = "thePoints.dat";
@@ -254,7 +254,7 @@ int main(int argc, char* argv[]) {
     AcoResult result = aco.run(ops);
     auto t2 = chrono::high_resolution_clock::now();
 
-    // ✅ FIXED: floating-point milliseconds
+    //floating-point milliseconds
     chrono::duration<double, milli> duration = t2 - t1;
     double time_ms = duration.count();
 
